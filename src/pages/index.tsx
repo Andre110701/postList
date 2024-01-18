@@ -8,19 +8,21 @@ import { useEffect, useState } from 'react'
 import { GetPostsType, getPostsService } from '@/api/services/getPostsService'
 import { Paragraph } from '@/components/atoms/typography/paragraph/Paragraph'
 import { BlankModal } from '@/components/molecules/blankModal'
-import { Icon } from '@iconify/react/dist/iconify.js'
 import {  useFormik } from 'formik'
 import { validationSchema } from '@/utils/validationSchema'
 import { Input } from '@/components/atoms/input/Input'
 import { postPostsService } from '@/api/services/postPostsService'
 import { deletePostService } from '@/api/services/deletePostService'
-import { getCommentsService } from '@/api/services/getCommentsService'
+import { GetCommentsType, getCommentsService } from '@/api/services/getCommentsService'
 
 const PostList = () => {
   const router = useRouter()
   const [date, setDate] = useState<GetPostsType[]>()
   const [showPostPostsModal, setShowPostPostsModal] = useState(false)
   const [showDeletePostModal, setShowDeletePostModal] = useState(false)
+  const [showCommentsModal, setShowCommentsModal] = useState(false)
+  const [commentsData, setCommentsData] = useState<GetCommentsType[]>()
+  console.log("🚀 ~ PostList ~ commentsData:", commentsData)
   const [isId, setIsId] = useState(0)
 
 
@@ -80,9 +82,11 @@ const PostList = () => {
         // TODO open alert modal
       }
     }
-  const displayComments = async (id: number) => {
+  const displayComments = async (item: GetPostsType) => {
       try {
-        const comments = await getCommentsService(id)
+        const comments = await getCommentsService(item.id)
+        setCommentsData(comments)
+        setShowCommentsModal(true)
         console.log("🚀 ~ displayComments ~ comments:", comments)
       } catch (error) {
         console.log('🚀 ~ error', error);
@@ -113,7 +117,10 @@ const PostList = () => {
             return (
               <>
           <S.StatementItem key={item.id}>
-            <div onClick={() => displayComments(item.id)} style={{display: 'flex', width: '100%', justifyContent: 'space-between', gap: theme.spacing.nth10}}>
+            <div onClick={() => displayComments(item)}
+            style={{display: 'flex', width: '100%',
+            justifyContent: 'space-between',
+            gap: theme.spacing.nth10}}>
             <Title variant='h3'>{item.id}</Title>
             <div className='content'>
             <Paragraph variant='SM'>{item.title}</Paragraph>
@@ -135,7 +142,50 @@ const PostList = () => {
           })}
         </S.PostsContainer>
       </S.Card>
-      {/* change nickname modal */}
+      {/* add comments modal */}
+      <BlankModal
+          isOpen={showCommentsModal}
+          onClose={() => setShowCommentsModal(false)}
+          borderRadius={theme.border.radius.md}
+          backgroundColor="var(--cinza-5, #F5F5F5)"
+        >
+          <S.ModalContentWrapper onSubmit={addPostFormik.handleSubmit}>
+            <S.Wrapper rowGap="8px">
+              <Title variant="h3" color={theme.color.gray.nth1}>
+                Comentários
+              </Title>
+            </S.Wrapper>
+
+            <S.Wrapper rowGap={theme.spacing.nth6}>
+             <S.CommentsContainer>
+                  {commentsData?.map((item) => {
+                        return (
+                          <div key={item.id}>{item.email}</div>
+                        )
+                  })}
+             </S.CommentsContainer>
+            </S.Wrapper>
+            <S.Wrapper style={{display: 'flex', flexDirection: 'row',gap: theme.spacing.nth2}}
+            rowGap={theme.spacing.nth6}>
+              <Input
+                label='Adicionar comentário'
+                variant="text"
+                name="mensage"
+                formik={addPostFormik}
+                backgroundColor="transparent"
+                hasBorder
+                error={
+                  addPostFormik.errors.mensage &&
+                  addPostFormik.submitCount > 0
+                    ? addPostFormik.errors.mensage
+                    : undefined
+                }
+              />
+              <Button color='white' icon='gg:add' variant="filled" type="submit" fullWidth={false} />
+            </S.Wrapper>
+          </S.ModalContentWrapper>
+        </BlankModal>
+      {/* add post modal */}
       <BlankModal
           isOpen={showPostPostsModal}
           onClose={() => setShowPostPostsModal(false)}
@@ -193,7 +243,7 @@ const PostList = () => {
             </S.Wrapper>
           </S.ModalContentWrapper>
         </BlankModal>
-        {/* delete count modal */}
+        {/* delete post modal */}
         <BlankModal
           isOpen={showDeletePostModal}
           onClose={() => setShowDeletePostModal(false)}

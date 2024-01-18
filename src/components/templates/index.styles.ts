@@ -71,6 +71,16 @@ export const PostsContainer = styled.div`
     gap: ${theme.spacing.nth10};
   `}
 `
+export const CommentsContainer = styled.div`
+  ${({ theme }) => css`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
+    align-items: center;
+    gap: ${theme.spacing.nth10};
+  `}
+`
 
 export const LogoWrapper = styled.div`
   width: 100%;
@@ -119,9 +129,6 @@ export const StatementItem = styled.div`
     width: 100%;
     align-items: center;
     justify-content: space-between;
-    div:first{ h1 {
-      margin-right: ${theme.spacing.nth10};
-    }}
     .content {
       display: flex;
       width: 700px;
