@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { GetPostsType, getPostsService } from '@/api/services/getPostsService'
 import { Paragraph } from '@/components/atoms/typography/paragraph/Paragraph'
 
-const Login = () => {
+const PostList = () => {
   const router = useRouter()
   const [date, setDate] = useState<GetPostsType[]>()
 
@@ -77,4 +77,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default PostList
