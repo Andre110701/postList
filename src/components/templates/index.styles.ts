@@ -76,9 +76,19 @@ export const CommentsContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
+    max-height: 400px;
     overflow-x: hidden;
-    align-items: center;
     gap: ${theme.spacing.nth10};
+    align-items: center;
+  `}
+`
+export const Comments = styled.div`
+  ${({ theme }) => css`
+    display: flex;
+    flex-direction: column;
+    gap: ${theme.spacing.nth2};
+    align-items: center;
+
   `}
 `
 

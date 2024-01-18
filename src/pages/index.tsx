@@ -14,6 +14,7 @@ import { Input } from '@/components/atoms/input/Input'
 import { postPostsService } from '@/api/services/postPostsService'
 import { deletePostService } from '@/api/services/deletePostService'
 import { GetCommentsType, getCommentsService } from '@/api/services/getCommentsService'
+import { postCommentsService } from '@/api/services/postCommentsService'
 
 const PostList = () => {
   const router = useRouter()
@@ -22,6 +23,7 @@ const PostList = () => {
   const [showDeletePostModal, setShowDeletePostModal] = useState(false)
   const [showCommentsModal, setShowCommentsModal] = useState(false)
   const [commentsData, setCommentsData] = useState<GetCommentsType[]>()
+  const [selectedPost, setSelectedPost] = useState<GetPostsType>()
   console.log("🚀 ~ PostList ~ commentsData:", commentsData)
   const [isId, setIsId] = useState(0)
 
@@ -49,14 +51,18 @@ const PostList = () => {
 
   const ordenedArray = date?.sort(alphabeticalOrder)
 
-  const changeNickNameInitialValues = {
+  const addPostInitilValues = {
+    title: '',
+   mensage: ''
+  };
+  const addCommentsInitilValues = {
     title: '',
    mensage: ''
   };
 
   const addPostFormik = useFormik({
-    initialValues: changeNickNameInitialValues,
-    validationSchema: validationSchema(changeNickNameInitialValues),
+    initialValues: addPostInitilValues,
+    validationSchema: validationSchema(addPostInitilValues),
     onSubmit: async (values) => {
       try {
         const validate = date?.some((item) => item.title === values.title)
@@ -67,6 +73,24 @@ const PostList = () => {
         } else {
           console.log('erro');
         }
+      } catch (error) {
+        console.log('🚀 ~ file: index.tsx:98 ~ onSubmit: ~ error:', error);
+      }
+    },
+  });
+  const addComment = useFormik({
+    initialValues: addCommentsInitilValues,
+    validationSchema: validationSchema(addCommentsInitilValues),
+    onSubmit: async (values) => {
+      const commentData = {
+        id: selectedPost?.id,
+        title: selectedPost?.title,
+        body: values.mensage
+      }
+      try {
+          await postCommentsService(commentData)
+          setShowCommentsModal(false)
+          addComment.resetForm()
       } catch (error) {
         console.log('🚀 ~ file: index.tsx:98 ~ onSubmit: ~ error:', error);
       }
@@ -83,6 +107,7 @@ const PostList = () => {
       }
     }
   const displayComments = async (item: GetPostsType) => {
+      setSelectedPost(item)
       try {
         const comments = await getCommentsService(item.id)
         setCommentsData(comments)
@@ -149,7 +174,7 @@ const PostList = () => {
           borderRadius={theme.border.radius.md}
           backgroundColor="var(--cinza-5, #F5F5F5)"
         >
-          <S.ModalContentWrapper onSubmit={addPostFormik.handleSubmit}>
+          <S.ModalContentWrapper onSubmit={addComment.handleSubmit}>
             <S.Wrapper rowGap="8px">
               <Title variant="h3" color={theme.color.gray.nth1}>
                 Comentários
@@ -160,7 +185,10 @@ const PostList = () => {
              <S.CommentsContainer>
                   {commentsData?.map((item) => {
                         return (
-                          <div key={item.id}>{item.email}</div>
+                          <S.Comments key={item.id}>
+                          <Subtitle variant='MD' fontWeight='semibold'>{item.name}</Subtitle>
+                          <Paragraph variant='LG'>{item.body}</Paragraph>
+                          </S.Comments>
                         )
                   })}
              </S.CommentsContainer>
